@@ -1,8 +1,31 @@
+import os
+from contextlib import asynccontextmanager
 from typing import Any
 
+import asyncpg
 from fastapi import FastAPI, Request
 
-app = FastAPI(title="fastapi-echo")
+DATABASE_URL = os.environ["DATABASE_URL"]
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=5)
+    async with app.state.pool.acquire() as conn:
+        await conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS echoes (
+                id serial PRIMARY KEY,
+                message text NOT NULL,
+                created_at timestamptz NOT NULL DEFAULT now()
+            )
+            """
+        )
+    yield
+    await app.state.pool.close()
+
+
+app = FastAPI(title="fastapi-echo", lifespan=lifespan)
 
 
 @app.get("/")
@@ -26,6 +49,19 @@ async def echo_body(request: Request) -> dict[str, Any]:
     if not body:
         return {"echo": None}
     try:
-        return {"echo": await request.json()}
+        parsed = await request.json()
     except ValueError:
-        return {"echo": body.decode(errors="replace")}
+        parsed = body.decode(errors="replace")
+
+    async with request.app.state.pool.acquire() as conn:
+        await conn.execute("INSERT INTO echoes (message) VALUES ($1)", str(parsed))
+    return {"echo": parsed}
+
+
+@app.get("/echo-history")
+async def echo_history(request: Request) -> list[dict[str, Any]]:
+    async with request.app.state.pool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT id, message, created_at FROM echoes ORDER BY id DESC LIMIT 20"
+        )
+    return [dict(row) for row in rows]
