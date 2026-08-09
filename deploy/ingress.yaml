@@ -1,0 +1,21 @@
+# Same pattern as homelab's grafana-ingress.yaml: hostname comes from
+# spec.tls[].hosts, not metadata.name.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fastapi-echo
+  namespace: fastapi-echo
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts: ["fastapi-echo"]
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-echo
+                port:
+                  number: 80
