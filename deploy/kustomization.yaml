@@ -2,7 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - namespace.yaml
-  - cluster-postgres.yaml
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
+  # database.yaml before application.yaml is cosmetic, not an ordering
+  # guarantee — Flux applies these in one pass and kro resolves the attachment
+  # on a later reconcile if the Database isn't registered yet.
+  - database.yaml
+  - application.yaml

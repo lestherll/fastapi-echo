@@ -5,7 +5,12 @@ from typing import Any
 import asyncpg
 from fastapi import FastAPI, Request
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+# DATABASE_URL_MAIN, not DATABASE_URL: the platform injects one variable per
+# attached database, suffixed with that attachment's alias (`as: main` in
+# deploy/application.yaml). The suffix is unconditional — there is no bare
+# name for the single-database case — so that adding a second database later
+# is purely additive instead of silently changing what DATABASE_URL means.
+DATABASE_URL = os.environ["DATABASE_URL_MAIN"]
 
 
 @asynccontextmanager

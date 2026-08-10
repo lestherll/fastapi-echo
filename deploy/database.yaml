@@ -1,0 +1,17 @@
+# Replaces the hand-written CloudNativePG Cluster this repo used to carry.
+#
+# The Database type (platform.homelab/v1alpha1, defined in the homelab repo's
+# infrastructure/platform-api/) renders that Cluster plus a PodMonitor, so this
+# app is scraped by Prometheus without any further wiring — which the
+# hand-written version never was.
+#
+# One Database is 1:1 with its consumer by convention. CloudNativePG can only
+# hand out one bootstrap credential per cluster, so a second app attaching here
+# would receive identical credentials rather than isolated ones.
+apiVersion: platform.homelab/v1alpha1
+kind: Database
+metadata:
+  name: fastapi-echo-db
+  namespace: fastapi-echo
+spec:
+  size: small
