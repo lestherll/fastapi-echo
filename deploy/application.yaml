@@ -1,0 +1,28 @@
+# Replaces the hand-written Deployment, Service and Ingress.
+#
+# The rendered objects are equivalent to what those three files produced —
+# verified by diffing them against the live cluster before this migration —
+# with one deliberate exception: the database credential arrives as
+# DATABASE_URL_MAIN rather than DATABASE_URL, matching the `as: main` alias
+# below. That rename is the entire cost of adopting the platform for this app.
+apiVersion: platform.homelab/v1alpha1
+kind: Application
+metadata:
+  name: fastapi-echo
+  namespace: fastapi-echo
+spec:
+  # :latest — no image-automation reconciler yet (unbuilt C3/D2). The platform
+  # sets imagePullPolicy: Always, so a rollout re-pulls.
+  image: ghcr.io/lestherll/fastapi-echo:latest
+  port: 8000
+  # Tailscale hostname without the tailnet suffix; the operator resolves the
+  # full FQDN and the platform reads it back into status.url.
+  host: fastapi-echo
+  probePath: /healthz
+  size: small
+  databases:
+    # `ref` names the Database above; `as` becomes the env var suffix. Always a
+    # list, even with one entry, so growing a second attachment never requires
+    # rewriting the first.
+    - ref: fastapi-echo-db
+      as: main
