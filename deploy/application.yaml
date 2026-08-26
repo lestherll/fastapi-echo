@@ -11,8 +11,8 @@ metadata:
   name: fastapi-echo
   namespace: fastapi-echo
 spec:
-  # :latest — no image-automation reconciler yet (unbuilt C3/D2). The platform
-  # sets imagePullPolicy: Always, so a rollout re-pulls.
+  # Digest-pinned by build.yml on every push to main (homelab CONCEPT.md D19)
+  # — do not hand-edit, the next build overwrites this.
   image: ghcr.io/lestherll/fastapi-echo:latest
   port: 8000
   # Tailscale hostname without the tailnet suffix; the operator resolves the
