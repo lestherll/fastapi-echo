@@ -13,7 +13,7 @@ metadata:
 spec:
   # Digest-pinned by build.yml on every push to main (homelab CONCEPT.md D19)
   # — do not hand-edit, the next build overwrites this.
-  image: ghcr.io/lestherll/fastapi-echo@sha256:a9fc52a7cb7a343ab15c0bfc36647d9cd0a7de181cb245dcd184a33e28520a19
+  image: ghcr.io/lestherll/fastapi-echo@sha256:439da33dacb9836d90773348b55905eb98cb7df3d562c85a293b221b3bf09603
   port: 8000
   # Tailscale hostname without the tailnet suffix; the operator resolves the
   # full FQDN and the platform reads it back into status.url.
